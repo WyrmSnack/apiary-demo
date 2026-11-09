@@ -1,0 +1,98 @@
+{
+  "about": "Task file names (5.1) and contents (5.2).",
+  "valid_names": [
+    "014-save-slots.task",
+    "123456-x.task",
+    "001-a1-b2.task",
+    "000-x.task"
+  ],
+  "invalid_names": [
+    "14-x.task",
+    "1234567-x.task",
+    "014_save.task",
+    "014-Save.task",
+    "014-.task",
+    "014-x.txt",
+    "014-x--y.task",
+    "014-x-.task",
+    "../014-x.task",
+    "014-x.task.bak"
+  ],
+  "valid_contents": [
+    {
+      "text": "objective: Player can save.\nacceptance: pytest tests/test_save.py\n",
+      "fields": {
+        "objective": "Player can save.",
+        "acceptance": "pytest tests/test_save.py"
+      },
+      "depends_on": []
+    },
+    {
+      "text": "# tasks/pending/014-save-slots.task\nobjective:    Save to three slots.\n\nacceptance:   python -m pytest -q tests/test_save_slots.py\nwrites:       engine/save.py, tests/test_save_slots.py\ndepends-on:   011, 12\nestimate: 2h\n",
+      "fields": {
+        "objective": "Save to three slots.",
+        "acceptance": "python -m pytest -q tests/test_save_slots.py",
+        "writes": "engine/save.py, tests/test_save_slots.py",
+        "depends-on": "011, 12",
+        "estimate": "2h"
+      },
+      "depends_on": [
+        11,
+        12
+      ]
+    },
+    {
+      "text": "objective: x\r\nacceptance: y\r\n",
+      "fields": {
+        "objective": "x",
+        "acceptance": "y"
+      },
+      "depends_on": []
+    },
+    {
+      "text": "objective: a: b: c\nacceptance: y\n",
+      "fields": {
+        "objective": "a: b: c",
+        "acceptance": "y"
+      },
+      "depends_on": []
+    }
+  ],
+  "invalid_contents": [
+    {
+      "text": "objective: x\n",
+      "rule": "T-4",
+      "why": "no acceptance"
+    },
+    {
+      "text": "acceptance: y\n",
+      "rule": "T-4",
+      "why": "no objective"
+    },
+    {
+      "text": "objective:\nacceptance: y\n",
+      "rule": "T-4",
+      "why": "empty objective"
+    },
+    {
+      "text": "objective: x\nacceptance: y\nobjective: z\n",
+      "rule": "T-4",
+      "why": "duplicate key"
+    },
+    {
+      "text": "objective: x\nacceptance: y\nthis line has no key\n",
+      "rule": "T-3",
+      "why": "not a field"
+    },
+    {
+      "text": "Objective: x\nacceptance: y\n",
+      "rule": "T-3",
+      "why": "uppercase key"
+    },
+    {
+      "text": "objective: x\nacceptance: y\ndepends-on: eleven\n",
+      "rule": "T-5",
+      "why": "depends-on is not ids"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Pinned (Ch 21: pin MCP server versions). Bump deliberately, with a TRACE.
+# pytest-xdist runs the conformance suite in parallel; each check starts real server processes.
+mcp==2.3.0
+filelock==4.1.2
+pytest==9.1.1
+pytest-xdist==3.8.0

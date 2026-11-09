@@ -1,0 +1,59 @@
+name: ci
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false          # a Windows failure must not hide a Linux result, or the other way round
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.11", "3.12", "3.13"]
+        include:
+          - os: windows-latest
+            python: "3.13"
+    defaults:
+      run:
+        shell: bash             # Git Bash on Windows, so every command is the same on both
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: git config --global user.name ci && git config --global user.email ci@example.com
+      - run: python -m pip install -r requirements-dev.txt
+      # The hooks and configs `apiary init` writes run `python -m apiary...`, as they will for users.
+      - run: python -m pip install -e .
+      - run: mkdir -p evidence
+      - name: unit tests
+        run: python -m pytest -q -rA --tb=short --junitxml=evidence/junit-unit.xml tests
+      - name: conformance, reference implementation (must conform)
+        if: always()
+        run: python conformance/run.py reference
+      - name: conformance, the textbook design as written (must not conform)
+        if: always()
+        run: python conformance/run.py naive --expect-fail
+      - name: clean install, used the way Claude Code uses it
+        if: always()
+        run: python ci/clean_install_check.py
+      - name: the walkthrough
+        if: always()
+        run: python demo/walkthrough.py
+      - name: QUICKSTART.md, steps 2 and 4 as written
+        if: always()
+        run: python ci/quickstart_check.py
+      - name: annotate failures
+        if: failure()
+        run: if [ -f evidence/junit-unit.xml ]; then python ci/annotate_junit.py evidence/junit-unit.xml; fi
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: evidence-${{ matrix.os }}-py${{ matrix.python }}
+          path: evidence/

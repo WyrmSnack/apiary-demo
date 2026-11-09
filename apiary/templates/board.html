@@ -1,0 +1,621 @@
+<!doctype html>
+<!-- Made by apiary board (apiary/templates/board.html), from the Council of Agents' colony-board.html. The board
+     below is embedded in #board-data; editing it changes only this page and the plan.json it exports. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Colony Coordination Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gabarito:wght@600;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a whiteboard. Caste palette on the left, an infinite dotted canvas in the middle, a coordination
+   check and live Mermaid export on the right; the protocol's sequence diagram sits under the board. */
+:root{
+  --bg:#eef0ec; --board:#f8f9f6; --dot:#c9cec4; --ink:#1d221c; --muted:#5f685c; --rule:#d6dbd1; --panel:#ffffff;
+  --accent:#2f6b4f; --accent-ink:#ffffff; --focus:#2f6b4f; --edge:#7d8778;
+  --human:#f4c95d; --human-ink:#3b2c00;
+  --queen:#b9a3e3; --queen-ink:#271a45;
+  --forager:#8fd3b6; --forager-ink:#0f3324;
+  --nurse:#f2a7a0; --nurse-ink:#4a1612;
+  --guardian:#9fb7de; --guardian-ink:#13284a;
+  --check:#d9dcd3; --check-ink:#2a2f27;
+  --warn:#b4451f; --warn-bg:#fbe5da; --ok:#2f6b4f; --ok-bg:#e0efe6;
+  --f-display:"Gabarito","Trebuchet MS",Arial,sans-serif;
+  --f-body:"Figtree","Segoe UI",Helvetica,Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141812; --board:#1a1f18; --dot:#323a2f; --ink:#e6ebe2; --muted:#9aa595; --rule:#2c3429; --panel:#1f251d;
+  --accent:#7fc9a3; --accent-ink:#0d1f15; --focus:#7fc9a3; --edge:#7e8a79;
+  --human:#d9ab3a; --human-ink:#241900; --queen:#8e77c4; --queen-ink:#f4efff;
+  --forager:#4fa585; --forager-ink:#04170f; --nurse:#cf766d; --nurse-ink:#210604;
+  --guardian:#6f8fc2; --guardian-ink:#061226; --check:#3a4237; --check-ink:#e2e7de;
+  --warn:#f09a72; --warn-bg:#3a2016; --ok:#7fc9a3; --ok-bg:#183024; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141812; --board:#1a1f18; --dot:#323a2f; --ink:#e6ebe2; --muted:#9aa595; --rule:#2c3429; --panel:#1f251d;
+  --accent:#7fc9a3; --accent-ink:#0d1f15; --focus:#7fc9a3; --edge:#7e8a79;
+  --human:#d9ab3a; --human-ink:#241900; --queen:#8e77c4; --queen-ink:#f4efff;
+  --forager:#4fa585; --forager-ink:#04170f; --nurse:#cf766d; --nurse-ink:#210604;
+  --guardian:#6f8fc2; --guardian-ink:#061226; --check:#3a4237; --check-ink:#e2e7de;
+  --warn:#f09a72; --warn-bg:#3a2016; --ok:#7fc9a3; --ok-bg:#183024; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.shell{max-width:1440px;margin:0 auto;display:grid;gap:18px}
+header.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,3.4vw,34px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:6px 0 0;max-width:70ch}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px}
+button{font:600 13px/1 var(--f-body);color:var(--ink);background:var(--panel);border:1px solid var(--rule);border-radius:7px;padding:9px 12px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.workspace{display:grid;grid-template-columns:190px minmax(0,1fr) 320px;gap:12px;height:clamp(540px,74vh,860px)}
+@media (max-width:1100px){.workspace{grid-template-columns:170px minmax(0,1fr);height:auto}.side{grid-column:1/-1}}
+@media (max-width:700px){.workspace{grid-template-columns:minmax(0,1fr)}}
+.palette,.side{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px;min-width:0;overflow:auto}
+.label{font:700 11px/1.2 var(--f-display);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.palette .items{display:grid;gap:8px}
+@media (max-width:700px){.palette .items{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}}
+.chip{display:grid;gap:2px;padding:9px 10px;border-radius:6px;cursor:grab;user-select:none;border:1px solid rgba(0,0,0,.08);text-align:left;width:100%}
+.chip b{font:700 13px/1.2 var(--f-display)}
+.chip span{font-size:11.5px;opacity:.85}
+.chip:active{cursor:grabbing}
+.hint{font-size:12px;color:var(--muted);margin:12px 0 0}
+.c-human{background:var(--human);color:var(--human-ink)} .c-queen{background:var(--queen);color:var(--queen-ink)}
+.c-forager{background:var(--forager);color:var(--forager-ink)} .c-nurse{background:var(--nurse);color:var(--nurse-ink)}
+.c-guardian{background:var(--guardian);color:var(--guardian-ink)} .c-check{background:var(--check);color:var(--check-ink)}
+.c-checkpoint{background:var(--board);color:var(--ink);border:2px dashed var(--human)}
+.canvas{position:relative;overflow:hidden;border-radius:10px;border:1px solid var(--rule);background-color:var(--board);
+  background-image:radial-gradient(var(--dot) 1.2px,transparent 1.3px);background-size:22px 22px;touch-action:none;cursor:default;min-height:460px}
+.canvas.panning{cursor:grabbing}
+.world{position:absolute;left:0;top:0;transform-origin:0 0}
+svg.edges{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible}
+svg.edges path{fill:none;stroke:var(--edge);stroke-width:2}
+svg.edges path.sel{stroke:var(--accent);stroke-width:3}
+svg.edges path.hit{stroke:transparent;stroke-width:14;cursor:pointer}
+svg.edges path.temp{stroke:var(--accent);stroke-dasharray:6 5}
+svg.edges path.human{stroke:var(--human);stroke-width:2.5}
+.node{position:absolute;width:180px;min-height:78px;padding:10px 12px 12px;border-radius:4px;box-shadow:0 1px 0 rgba(0,0,0,.08),0 6px 14px rgba(0,0,0,.10);
+  cursor:grab;user-select:none;display:grid;gap:3px}
+.node.c-checkpoint{border-radius:12px;box-shadow:none}
+.node.c-check{border-radius:10px}
+.node.sel{outline:3px solid var(--accent);outline-offset:3px}
+.node.chain{box-shadow:0 0 0 3px var(--warn)}
+.node .kind{font:700 10px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.node .title{font:700 14.5px/1.25 var(--f-display);outline:none;word-break:break-word}
+.node .note{font-size:12px;line-height:1.35;opacity:.9;outline:none;word-break:break-word}
+.node [contenteditable="true"]{background:rgba(255,255,255,.45);border-radius:3px;cursor:text}
+.port{position:absolute;right:-9px;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:var(--panel);border:2px solid var(--edge);cursor:crosshair}
+.port:hover{border-color:var(--accent);background:var(--accent)}
+.elabel{position:absolute;transform:translate(-50%,-50%);font:600 11px/1.2 var(--f-mono);background:var(--panel);color:var(--ink);border:1px solid var(--rule);
+  border-radius:4px;padding:3px 6px;white-space:nowrap;cursor:pointer;outline:none}
+.elabel.sel{border-color:var(--accent);color:var(--accent)}
+.elabel[contenteditable="true"]{cursor:text}
+.zoom{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+.zoom button{padding:7px 10px;font-family:var(--f-mono)}
+.badge{position:absolute;left:10px;top:10px;font:600 11px/1 var(--f-mono);color:var(--muted);background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:5px 7px}
+.side{display:grid;gap:16px;align-content:start}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{border:1px solid var(--rule);border-radius:7px;padding:9px 10px}
+.stat b{display:block;font:800 22px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;color:var(--muted)}
+.verdict{border-radius:7px;padding:10px 12px;font-size:13px}
+.verdict.ok{background:var(--ok-bg);color:var(--ok)} .verdict.warn{background:var(--warn-bg);color:var(--warn)}
+.verdict p{margin:0 0 8px} .verdict p:last-child{margin:0}
+.counts{display:flex;flex-wrap:wrap;gap:6px}
+.counts span{font-size:12px;padding:3px 8px;border-radius:999px}
+pre.code{margin:0;font:12px/1.5 var(--f-mono);background:var(--bg);border:1px solid var(--rule);border-radius:7px;padding:10px;max-height:240px;overflow:auto;white-space:pre}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.below{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px}
+@media (max-width:900px){.below{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:18px;min-width:0}
+.card h2{font:800 19px/1.2 var(--f-display);margin:0 0 4px}
+.card p{margin:0 0 10px;color:var(--muted);font-size:14px}
+.mer{overflow-x:auto}
+ul.tips{margin:0;padding-left:18px;font-size:14px} ul.tips li{margin:0 0 6px}
+kbd{font:600 11px var(--f-mono);border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:var(--bg)}
+@media (prefers-reduced-motion:no-preference){.node{transition:box-shadow .15s}}
+.node .meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.node .meta span{font:600 10.5px/1 var(--f-mono);padding:3px 5px;border-radius:3px;background:rgba(255,255,255,.55);color:#1d221c}
+.node .meta .b-WARN,.node .meta .b-ESCALATE{background:var(--warn);color:#fff}
+.node .links a{font-size:11.5px;color:inherit;text-decoration:underline;margin-right:6px}
+.node.st-done{opacity:.55}
+.node.st-active{box-shadow:0 0 0 3px var(--accent)}
+.findings{margin:0;padding-left:18px;font-size:13.5px} .findings li{margin:0 0 6px}
+.findings li.refusal{color:var(--warn)}
+table.plan{width:100%;border-collapse:collapse;font-size:13px}
+table.plan th,table.plan td{text-align:left;border-bottom:1px solid var(--rule);padding:6px 6px;vertical-align:top}
+table.plan td code{font:12px var(--f-mono);word-break:break-word}
+.tablewrap{overflow-x:auto}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <div>
+      <h1 id="board-title">Colony Coordination Board</h1>
+      <p class="sub" id="board-sub">The plan as a board: one card per task, coloured by who does it. The board flags any run of agent tasks that goes too long without a human checkpoint. Edits change only this page: <b>Export plan.json</b> saves the revised plan for create_plan, and nothing here writes the colony.</p>
+    </div>
+    <div class="toolbar">
+      <button id="btn-fix" class="primary" type="button">Add checkpoint to longest run</button>
+      <button id="btn-fit" type="button">Fit to view</button>
+      <button id="btn-export" type="button">Export plan.json</button>
+      <button id="btn-reset" type="button">Reset to the plan</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="palette" aria-label="Castes">
+      <p class="label">Drag onto the board</p>
+      <div class="items" id="palette"></div>
+      <p class="hint">Drag a card's round handle to another card to connect them. Double-click any text to edit it. Select a card or a link and press <kbd>Delete</kbd> to remove it. Drag empty board to pan; scroll to zoom.</p>
+    </aside>
+
+    <div class="canvas" id="canvas" tabindex="0" aria-label="Coordination board">
+      <div class="world" id="world">
+        <svg class="edges" id="edges" aria-hidden="true"></svg>
+      </div>
+      <div class="badge" id="zoomlabel">100%</div>
+      <div class="zoom">
+        <button type="button" id="zout" aria-label="Zoom out">−</button>
+        <button type="button" id="zin" aria-label="Zoom in">+</button>
+      </div>
+    </div>
+
+    <aside class="side" aria-label="Coordination check">
+      <div>
+        <p class="label">Coordination check</p>
+        <div class="stats">
+          <div class="stat"><b id="s-touch">0</b><span>human touchpoints</span></div>
+          <div class="stat"><b id="s-run">0</b><span>longest run without a human</span></div>
+        </div>
+      </div>
+      <div class="row"><label for="limit" style="font-size:13px">Most agent steps before a human sees it</label>
+        <input id="limit" type="number" min="1" max="12" value="3" style="width:60px;font:600 14px var(--f-mono);padding:5px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--ink)"></div>
+      <div id="verdict" class="verdict ok"></div>
+      <div class="counts" id="counts"></div>
+      <div>
+        <div class="row" style="justify-content:space-between;margin-bottom:8px"><p class="label" style="margin:0">Mermaid export</p><button type="button" id="btn-copy">Copy</button></div>
+        <pre class="code" id="mermaid-out"></pre>
+      </div>
+      <div>
+        <p class="label">Exported plan.json</p>
+        <pre class="code" id="plan-out">Press Export plan.json to save the revised plan.</pre>
+      </div>
+    </aside>
+  </div>
+
+  <div class="below">
+    <section class="card">
+      <h2>What create_plan and the checks say</h2>
+      <p id="findings-sub">From the board as apiary drew it: create_plan's refusals (a dry run; nothing was written) and the coordination findings.</p>
+      <ul class="findings" id="findings"></ul>
+    </section>
+    <section class="card">
+      <h2>The plan</h2>
+      <p>Every task as it will be passed to create_plan. A <b>Human</b> task is a checkpoint: it closes only after the human writes <code>approve &lt;id&gt;</code>.</p>
+      <div class="tablewrap"><table class="plan"><thead><tr><th>Task</th><th>By</th><th>Lane</th><th>Waits for</th><th>Check</th><th>Writes</th></tr></thead><tbody id="plan-rows"></tbody></table></div>
+      <ul class="tips">
+        <li><b>Human</b> and <b>checkpoint</b> cards reset the run counter: they are where the human looks.</li>
+        <li><b>Add checkpoint to longest run</b> splits the longest unwatched run in the middle. <b>Export plan.json</b> saves the revised plan; the Queen passes it to plan_board again, then to create_plan.</li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+<script type="application/json" id="board-data">__BOARD_DATA__</script>
+<script>
+(function(){
+const KINDS = {
+  human:{label:"Human", desc:"The human decides or acts", human:true},
+  checkpoint:{label:"Checkpoint", desc:"by: Human; closes on approve <id>", human:true},
+  queen:{label:"Queen", desc:"Plans, creates, reports"},
+  forager:{label:"Forager", desc:"Builds one task"},
+  nurse:{label:"Nurse", desc:"Researches, files knowledge"},
+  guardian:{label:"Guardian", desc:"Verifies a Nurse's work"},
+  check:{label:"Check", desc:"An acceptance command"}
+};
+const ORDER = ["human","checkpoint","queen","forager","nurse","guardian","check"];
+const DATA = JSON.parse(document.getElementById("board-data").textContent);
+const BY = {human:"Human", checkpoint:"Human", queen:"Queen", forager:"Forager", nurse:"Nurse", guardian:"Guardian"};
+const SHAPE = {human:["([","])"],checkpoint:["{{","}}"],queen:["[","]"],forager:["[","]"],nurse:["[","]"],guardian:["[","]"],check:["{","}"]};
+
+// The board apiary drew, embedded in the page. Edits live only in this page until Export plan.json.
+function initial(){
+  const b = JSON.parse(JSON.stringify(DATA));
+  return {nodes:b.nodes||[], edges:b.edges||[], view:b.view||{x:20,y:20,z:.8}, limit:b.limit||3};
+}
+
+let state = initial();
+let sel = null;           // {type:"node"|"edge", id}
+const $ = id => document.getElementById(id);
+const canvas = $("canvas"), world = $("world"), svg = $("edges");
+const SVGNS = "http://www.w3.org/2000/svg";
+
+function save(){}                 // nothing is stored: the colony is changed only through create_plan
+function uid(p){ return p + Math.random().toString(36).slice(2,8); }
+function nodeById(id){ return state.nodes.find(n=>n.id===id); }
+
+/* ---------- palette ---------- */
+const pal = $("palette");
+ORDER.forEach(k=>{
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip c-"+k; b.draggable = true;
+  b.innerHTML = "<b>"+KINDS[k].label+"</b><span>"+KINDS[k].desc+"</span>";
+  b.addEventListener("dragstart", ev=>{ ev.dataTransfer.setData("text/plain", k); ev.dataTransfer.effectAllowed="copy"; });
+  b.addEventListener("click", ()=>{               // touch screens: add at the centre of the view
+    const r = canvas.getBoundingClientRect();
+    const p = toWorld(r.left + r.width/2, r.top + r.height/2);
+    addNode(k, p.x-90, p.y-40);
+  });
+  pal.appendChild(b);
+});
+canvas.addEventListener("dragover", ev=>{ ev.preventDefault(); ev.dataTransfer.dropEffect="copy"; });
+canvas.addEventListener("drop", ev=>{
+  ev.preventDefault();
+  const k = ev.dataTransfer.getData("text/plain");
+  if(!KINDS[k]) return;
+  const p = toWorld(ev.clientX, ev.clientY);
+  addNode(k, p.x-90, p.y-30);
+});
+function addNode(kind,x,y){
+  const n = {id:uid("n"),kind,x:Math.round(x),y:Math.round(y),title:KINDS[kind].label,note:KINDS[kind].desc};
+  state.nodes.push(n); sel = {type:"node",id:n.id}; changed();
+}
+
+/* ---------- view ---------- */
+function applyView(){
+  const v = state.view;
+  world.style.transform = `translate(${v.x}px,${v.y}px) scale(${v.z})`;
+  canvas.style.backgroundSize = `${22*v.z}px ${22*v.z}px`;
+  canvas.style.backgroundPosition = `${v.x}px ${v.y}px`;
+  $("zoomlabel").textContent = Math.round(v.z*100)+"%";
+}
+function toWorld(cx,cy){
+  const r = canvas.getBoundingClientRect(), v = state.view;
+  return {x:(cx - r.left - v.x)/v.z, y:(cy - r.top - v.y)/v.z};
+}
+function zoomAt(cx,cy,f){
+  const v = state.view, r = canvas.getBoundingClientRect();
+  const nz = Math.min(2, Math.max(.25, v.z*f));
+  const mx = cx - r.left, my = cy - r.top;
+  v.x = mx - (mx - v.x)*(nz/v.z); v.y = my - (my - v.y)*(nz/v.z); v.z = nz;
+  applyView(); save();
+}
+canvas.addEventListener("wheel", ev=>{ ev.preventDefault(); zoomAt(ev.clientX, ev.clientY, ev.deltaY<0?1.1:1/1.1); }, {passive:false});
+$("zin").onclick = ()=>{ const r=canvas.getBoundingClientRect(); zoomAt(r.left+r.width/2, r.top+r.height/2, 1.2); };
+$("zout").onclick = ()=>{ const r=canvas.getBoundingClientRect(); zoomAt(r.left+r.width/2, r.top+r.height/2, 1/1.2); };
+function fit(){
+  if(!state.nodes.length){ state.view={x:20,y:20,z:1}; applyView(); return; }
+  const r = canvas.getBoundingClientRect();
+  const xs = state.nodes.map(n=>n.x), ys = state.nodes.map(n=>n.y);
+  const minX = Math.min(...xs)-30, minY = Math.min(...ys)-30, maxX = Math.max(...xs)+220, maxY = Math.max(...ys)+130;
+  const z = Math.min(1.2, Math.max(.25, Math.min(r.width/(maxX-minX), r.height/(maxY-minY))));
+  state.view = {x:(r.width-(maxX-minX)*z)/2 - minX*z, y:(r.height-(maxY-minY)*z)/2 - minY*z, z};
+  applyView(); save();
+}
+$("btn-fit").onclick = fit;
+
+/* ---------- rendering ---------- */
+const nodeEls = new Map();
+function renderNodes(){
+  world.querySelectorAll(".node,.elabel").forEach(el=>el.remove());
+  nodeEls.clear();
+  state.nodes.forEach(n=>{
+    const el = document.createElement("div");
+    el.className = "node c-"+n.kind; el.dataset.id = n.id; el.tabIndex = 0;
+    el.style.left = n.x+"px"; el.style.top = n.y+"px";
+    if(n.status) el.classList.add("st-"+n.status);
+    el.innerHTML = `<div class="kind"></div><div class="title"></div><div class="note"></div><div class="meta"></div><div class="links"></div><div class="port" title="Drag to connect"></div>`;
+    el.querySelector(".kind").textContent = KINDS[n.kind].label + (n.lane ? " · " + n.lane : "");
+    el.querySelector(".title").textContent = n.title;
+    el.querySelector(".note").textContent = n.note || "";
+    const meta = el.querySelector(".meta");
+    const pill = (text, cls)=>{ const sp = document.createElement("span"); sp.textContent = text; if(cls) sp.className = cls; meta.appendChild(sp); };
+    if(n.status) pill(n.status);
+    Object.entries(n.badges || {}).forEach(([k,v])=>pill(k+" "+v, "b-"+k));
+    (n.after_existing || []).forEach(d=>pill("after "+d));
+    const links = el.querySelector(".links");
+    (n.notes || []).forEach(l=>{ const a = document.createElement("a"); a.href = l.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = "[["+l.note+"]]"; links.appendChild(a); });
+    world.appendChild(el); nodeEls.set(n.id, el);
+  });
+}
+function anchor(n, side){
+  const el = nodeEls.get(n.id);
+  const h = el ? el.offsetHeight : 78, w = el ? el.offsetWidth : 180;
+  return side==="out" ? {x:n.x+w, y:n.y+h/2} : {x:n.x, y:n.y+h/2};
+}
+function curve(a,b){
+  const dx = Math.max(60, Math.abs(b.x-a.x)/2);
+  return `M${a.x},${a.y} C${a.x+dx},${a.y} ${b.x-dx},${b.y} ${b.x},${b.y}`;
+}
+function renderEdges(){
+  svg.innerHTML = "";
+  world.querySelectorAll(".elabel").forEach(el=>el.remove());
+  const defs = document.createElementNS(SVGNS,"defs");
+  defs.innerHTML = `<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--edge);stroke:none"></path></marker>`;
+  svg.appendChild(defs);
+  state.edges.forEach(e=>{
+    const a = nodeById(e.from), b = nodeById(e.to);
+    if(!a || !b) return;
+    const p1 = anchor(a,"out"), p2 = anchor(b,"in"), d = curve(p1,p2);
+    const isHuman = KINDS[b.kind].human || KINDS[a.kind].human;
+    const vis = document.createElementNS(SVGNS,"path");
+    vis.setAttribute("d", d); vis.setAttribute("marker-end","url(#arr)");
+    vis.setAttribute("class", (sel&&sel.type==="edge"&&sel.id===e.id?"sel ":"") + (isHuman?"human":""));
+    const hit = document.createElementNS(SVGNS,"path");
+    hit.setAttribute("d", d); hit.setAttribute("class","hit"); hit.dataset.edge = e.id;
+    svg.appendChild(vis); svg.appendChild(hit);
+    if(e.label){
+      const t=.5, mt=1-t, dx=Math.max(60,Math.abs(p2.x-p1.x)/2);
+      const x = mt*mt*mt*p1.x + 3*mt*mt*t*(p1.x+dx) + 3*mt*t*t*(p2.x-dx) + t*t*t*p2.x;
+      const y = mt*mt*mt*p1.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p2.y;
+      const lab = document.createElement("div");
+      lab.className = "elabel" + (sel&&sel.type==="edge"&&sel.id===e.id?" sel":"");
+      lab.dataset.edge = e.id; lab.textContent = e.label;
+      lab.style.left = x+"px"; lab.style.top = y+"px";
+      world.appendChild(lab);
+    }
+  });
+}
+function markSelection(){
+  nodeEls.forEach((el,id)=>el.classList.toggle("sel", !!sel && sel.type==="node" && sel.id===id));
+}
+function render(){ renderNodes(); renderEdges(); markSelection(); analyse(); }
+function changed(){ save(); render(); }
+
+/* ---------- analysis ---------- */
+function analyse(){
+  const limit = Math.max(1, parseInt($("limit").value,10) || 3);
+  state.limit = limit;
+  const isHuman = id => { const n=nodeById(id); return n && KINDS[n.kind].human; };
+  const out = {}; state.nodes.forEach(n=>out[n.id]=[]);
+  state.edges.forEach(e=>{ if(out[e.from] && nodeById(e.to)) out[e.from].push(e.to); });
+  // Longest run of non-human nodes along the links (cycles cut by the visiting set).
+  const memo = {};
+  function run(id, seen){
+    if(isHuman(id)) return [];
+    if(memo[id]) return memo[id];
+    seen.add(id);
+    let best = [];
+    out[id].forEach(t=>{ if(!seen.has(t)){ const r = run(t, seen); if(r.length>best.length) best = r; } });
+    seen.delete(id);
+    return memo[id] = [id].concat(best);
+  }
+  let longest = [];
+  state.nodes.forEach(n=>{ const r = run(n.id, new Set()); if(r.length>longest.length) longest = r; });
+  // Count only agent castes in the run: checks are commands, not steps someone takes.
+  const agentSteps = longest.filter(id=>{ const k=nodeById(id).kind; return k!=="check"; });
+  const touch = state.nodes.filter(n=>KINDS[n.kind].human).length;
+  $("s-touch").textContent = touch;
+  $("s-run").textContent = agentSteps.length;
+  nodeEls.forEach(el=>el.classList.remove("chain"));
+  const v = $("verdict");
+  if(!state.nodes.length){ v.className="verdict ok"; v.innerHTML="<p>The board is empty. Drag a caste onto it to start.</p>"; }
+  else if(agentSteps.length > limit){
+    longest.forEach(id=>nodeEls.get(id) && nodeEls.get(id).classList.add("chain"));
+    v.className = "verdict warn";
+    v.innerHTML = `<p><b>${agentSteps.length} agent tasks run before the human sees the work</b> (limit ${limit}). They are outlined on the board.</p><p>Add a checkpoint in that run, or raise the limit.</p>`;
+  } else {
+    v.className = "verdict ok";
+    v.innerHTML = touch ? `<p><b>The human sees the work at least every ${limit} agent tasks.</b> Longest unwatched run: ${agentSteps.length}.</p>`
+                        : `<p><b>No human on the board.</b> Add a checkpoint so someone sees the work.</p>`;
+    if(!touch) v.className = "verdict warn";
+  }
+  $("btn-fix").disabled = agentSteps.length <= limit;
+  $("btn-fix").dataset.run = JSON.stringify(longest);
+  const counts = $("counts"); counts.innerHTML = "";
+  ORDER.forEach(k=>{ const c = state.nodes.filter(n=>n.kind===k).length; if(c){ const s=document.createElement("span"); s.className="c-"+k; s.textContent=c+" "+KINDS[k].label+(c>1?"s":""); counts.appendChild(s);} });
+  $("mermaid-out").textContent = toMermaid();
+}
+$("limit").addEventListener("input", ()=>{ save(); analyse(); });
+if(state.limit) $("limit").value = state.limit;
+
+$("btn-fix").onclick = ()=>{
+  const run = JSON.parse($("btn-fix").dataset.run || "[]");
+  if(run.length < 2) return;
+  const i = Math.floor((run.length-1)/2), a = nodeById(run[i]), b = nodeById(run[i+1]);
+  const edge = state.edges.find(e=>e.from===a.id && e.to===b.id);
+  const c = {id:uid("n"),kind:"checkpoint",x:Math.round((a.x+b.x)/2),y:Math.round(Math.max(a.y,b.y)+120),
+             title:"review-"+(b.slug||b.title),note:"The human reviews before "+b.title+" starts"};
+  state.nodes.push(c);
+  if(edge){ edge.to = c.id; }
+  state.edges.push({id:uid("e"),from:c.id,to:b.id,label:"go on"});
+  sel = {type:"node",id:c.id}; changed();
+};
+
+/* ---------- mermaid ---------- */
+function esc(s){ return String(s||"").replace(/"/g,"'").replace(/[\[\]{}()<>|]/g," ").replace(/\s+/g," ").trim(); }
+function cardText(n){
+  const extra = n.note ? [String(n.note).slice(0,90)] : [];
+  if(n.status) extra.unshift([n.status].concat(Object.keys(n.badges||{}).sort().map(k=>k+" "+n.badges[k])).join(" · "));
+  return esc(n.title) + extra.map(x=>"<br/><small>"+esc(x)+"</small>").join("");
+}
+function toMermaid(){
+  const L = ["flowchart LR"];
+  state.nodes.forEach(n=>{
+    const [o,c] = SHAPE[n.kind] || ["[","]"];
+    L.push(`  ${n.id}${o}"${cardText(n)}"${c}:::${n.kind}`);
+  });
+  state.edges.forEach(e=>{
+    if(!nodeById(e.from)||!nodeById(e.to)) return;
+    L.push(e.label ? `  ${e.from} -->|"${esc(e.label)}"| ${e.to}` : `  ${e.from} --> ${e.to}`);
+  });
+  state.nodes.forEach(n=>{ if(n.notes && n.notes.length) L.push(`  click ${n.id} "${n.notes[0].url}" _blank`); });
+  L.push("  classDef human fill:#f4c95d,stroke:#8a6a10,color:#3b2c00");
+  L.push("  classDef checkpoint fill:#fff8e3,stroke:#d9a520,stroke-dasharray:5 4,color:#3b2c00");
+  L.push("  classDef queen fill:#b9a3e3,stroke:#5c45a0,color:#271a45");
+  L.push("  classDef forager fill:#8fd3b6,stroke:#2f7a5a,color:#0f3324");
+  L.push("  classDef nurse fill:#f2a7a0,stroke:#a8473f,color:#4a1612");
+  L.push("  classDef guardian fill:#9fb7de,stroke:#3b5e96,color:#13284a");
+  L.push("  classDef check fill:#e2e5dc,stroke:#7a8273,color:#2a2f27");
+  return L.join("\n");
+}
+
+/* ---------- export: a revised plan.json for create_plan; nothing here writes the colony ---------- */
+function slugify(s){ return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,50) || "task"; }
+function exportPlan(){
+  const slugOf = {}, used = new Set();
+  state.nodes.forEach(n=>{
+    if(n.kind==="check") return;
+    let base = n.task ? slugify(n.title === (n.task.slug || n.title) ? n.task.slug : n.title) : slugify(n.title), slug = base, i = 2;
+    while(used.has(slug)) slug = base + "-" + (i++);
+    used.add(slug); slugOf[n.id] = slug;
+  });
+  const tasks = [];
+  state.nodes.forEach(n=>{
+    if(!slugOf[n.id]) return;
+    const fresh = n.note && n.note !== KINDS[n.kind].desc ? n.note : n.title;      // a card added on this page
+    const t = n.task ? JSON.parse(JSON.stringify(n.task)) : {objective: fresh, acceptance: 'python -c "exit(0)"'};
+    t.slug = slugOf[n.id];
+    if(n.task && n.note && n.note !== n.task.objective) t.objective = n.note;
+    const unset = n.task && !n.task.by && n.kind === "forager";       // a task with no by: is drawn as a Forager
+    if(BY[n.kind] && !unset) t.by = BY[n.kind]; else if(!BY[n.kind]) delete t.by;
+    const existing = (n.after_existing || []).filter(x=>/^[0-9]+$/.test(String(x)));
+    const inPlan = state.edges.filter(e=>e.to===n.id && slugOf[e.from]).map(e=>slugOf[e.from]);
+    t.depends_on = existing.concat(inPlan.filter((x,i,a)=>a.indexOf(x)===i));
+    tasks.push(t);
+  });
+  return {tasks, decisions: DATA.decisions || []};
+}
+$("btn-export").onclick = ()=>{
+  const text = JSON.stringify(exportPlan(), null, 2) + "\n";
+  $("plan-out").textContent = text;
+  try{
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], {type:"application/json"}));
+    a.download = (DATA.name || "plan") + ".plan.json";
+    document.body.appendChild(a); a.click(); a.remove();
+  }catch(_){ /* the JSON is shown in the side panel to copy */ }
+};
+if(DATA.source === "live"){ $("btn-export").disabled = true; $("btn-export").title = "A live board shows tasks already created"; }
+
+/* ---------- what apiary found, and the plan table ---------- */
+function showFindings(){
+  if(DATA.name) $("board-title").textContent = "Board: " + DATA.name;
+  if(DATA.source === "live") $("board-sub").textContent = "The colony as it stands: every task, its status, and its WARN and ESCALATE lines. Read only.";
+  const ul = $("findings"); ul.innerHTML = "";
+  (DATA.refusals || []).forEach(r=>{ const li = document.createElement("li"); li.className = "refusal"; li.textContent = r; ul.appendChild(li); });
+  (DATA.findings || []).forEach(f=>{ const li = document.createElement("li"); li.textContent = f; ul.appendChild(li); });
+  if(!ul.children.length){ const li = document.createElement("li"); li.textContent = "None: create_plan would accept this plan, and every run has a human within the limit."; ul.appendChild(li); }
+  const body = $("plan-rows"); body.innerHTML = "";
+  const titleOf = {}; DATA.nodes.forEach(n=>titleOf[n.id]=n.title);
+  DATA.nodes.forEach(n=>{
+    const tr = document.createElement("tr");
+    const waits = DATA.edges.filter(e=>e.to===n.id).map(e=>titleOf[e.from]).concat(n.after_existing||[]).join(", ");
+    [n.title, n.by || "(unset)", n.lane || "", waits, n.acceptance || "", n.writes || ""].forEach((v,i)=>{
+      const td = document.createElement("td");
+      if(i>=4 && v){ const c = document.createElement("code"); c.textContent = v; td.appendChild(c); } else td.textContent = v;
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+$("btn-copy").onclick = async ()=>{
+  const text = $("mermaid-out").textContent, btn = $("btn-copy");
+  try{ await navigator.clipboard.writeText(text); btn.textContent = "Copied"; }
+  catch(_){ const r = document.createRange(); r.selectNodeContents($("mermaid-out")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selected: press Ctrl+C"; }
+  setTimeout(()=>btn.textContent="Copy", 1800);
+};
+
+/* ---------- pointer: drag cards, connect, pan, select ---------- */
+let drag = null;
+canvas.addEventListener("pointerdown", ev=>{
+  if(ev.button !== 0) return;
+  const t = ev.target;
+  if(t.closest("[contenteditable='true']") || t.closest(".zoom") || t.closest("a")) return;
+  const port = t.closest(".port"), node = t.closest(".node");
+  const edgeEl = t.dataset && t.dataset.edge ? t : t.closest("[data-edge]");
+  if(port && node){
+    const n = nodeById(node.dataset.id);
+    const temp = document.createElementNS(SVGNS,"path"); temp.setAttribute("class","temp"); svg.appendChild(temp);
+    drag = {mode:"link", from:n, temp};
+  } else if(node){
+    const n = nodeById(node.dataset.id), p = toWorld(ev.clientX, ev.clientY);
+    sel = {type:"node", id:n.id}; markSelection(); renderEdges();
+    drag = {mode:"move", n, el:node, ox:p.x-n.x, oy:p.y-n.y, moved:false};
+  } else if(edgeEl){
+    sel = {type:"edge", id:edgeEl.dataset.edge}; markSelection(); renderEdges(); return;
+  } else {
+    sel = null; markSelection(); renderEdges();
+    drag = {mode:"pan", sx:ev.clientX, sy:ev.clientY, vx:state.view.x, vy:state.view.y};
+    canvas.classList.add("panning");
+  }
+  canvas.setPointerCapture(ev.pointerId);
+});
+canvas.addEventListener("pointermove", ev=>{
+  if(!drag) return;
+  if(drag.mode==="move"){
+    const p = toWorld(ev.clientX, ev.clientY);
+    drag.n.x = Math.round(p.x - drag.ox); drag.n.y = Math.round(p.y - drag.oy); drag.moved = true;
+    drag.el.style.left = drag.n.x+"px"; drag.el.style.top = drag.n.y+"px";
+    renderEdges();
+  } else if(drag.mode==="link"){
+    drag.temp.setAttribute("d", curve(anchor(drag.from,"out"), toWorld(ev.clientX, ev.clientY)));
+  } else if(drag.mode==="pan"){
+    state.view.x = drag.vx + ev.clientX - drag.sx; state.view.y = drag.vy + ev.clientY - drag.sy; applyView();
+  }
+});
+canvas.addEventListener("pointerup", ev=>{
+  if(!drag) return;
+  if(drag.mode==="link"){
+    drag.temp.remove();
+    const hit = document.elementFromPoint(ev.clientX, ev.clientY);
+    const target = hit && hit.closest(".node");
+    if(target && target.dataset.id !== drag.from.id &&
+       !state.edges.some(e=>e.from===drag.from.id && e.to===target.dataset.id)){
+      const e = {id:uid("e"), from:drag.from.id, to:target.dataset.id, label:"hands off"};
+      state.edges.push(e); sel = {type:"edge", id:e.id}; changed();
+    }
+  } else if(drag.mode==="move"){ if(drag.moved){ save(); analyse(); } }
+  else { canvas.classList.remove("panning"); save(); }
+  drag = null;
+});
+
+/* ---------- editing ---------- */
+canvas.addEventListener("dblclick", ev=>{
+  const field = ev.target.closest(".title,.note,.elabel");
+  if(!field) return;
+  field.contentEditable = "true"; field.focus();
+  const r = document.createRange(); r.selectNodeContents(field); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  const finish = ()=>{
+    field.contentEditable = "false";
+    const text = field.textContent.trim();
+    if(field.classList.contains("elabel")){ const e = state.edges.find(x=>x.id===field.dataset.edge); if(e) e.label = text; }
+    else { const n = nodeById(field.closest(".node").dataset.id); if(field.classList.contains("title")) n.title = text || KINDS[n.kind].label; else n.note = text; }
+    changed();
+  };
+  field.addEventListener("blur", finish, {once:true});
+  field.addEventListener("keydown", k=>{ if(k.key==="Enter" && !k.shiftKey){ k.preventDefault(); field.blur(); } if(k.key==="Escape"){ field.blur(); } });
+});
+document.addEventListener("keydown", ev=>{
+  if(!sel || ev.target.closest && ev.target.closest("[contenteditable='true'],input,textarea")) return;
+  if(ev.key==="Delete" || ev.key==="Backspace"){
+    ev.preventDefault();
+    if(sel.type==="node"){ state.nodes = state.nodes.filter(n=>n.id!==sel.id); state.edges = state.edges.filter(e=>e.from!==sel.id && e.to!==sel.id); }
+    else state.edges = state.edges.filter(e=>e.id!==sel.id);
+    sel = null; changed();
+  }
+});
+
+/* ---------- board actions (confirm in place: dialogs do not show here) ---------- */
+function twoStep(btn, label, action){
+  btn.onclick = ()=>{
+    if(btn.dataset.armed){ delete btn.dataset.armed; btn.textContent = label; action(); return; }
+    btn.dataset.armed = "1"; btn.textContent = "Click again to confirm";
+    setTimeout(()=>{ if(btn.dataset.armed){ delete btn.dataset.armed; btn.textContent = label; } }, 2500);
+  };
+}
+twoStep($("btn-reset"), "Reset to the plan", ()=>{ state = initial(); $("limit").value = state.limit; sel=null; changed(); fit(); });
+
+showFindings(); applyView(); render();
+requestAnimationFrame(()=>{ renderEdges(); if(!state._fitted){ state._fitted = true; fit(); } });
+window.addEventListener("resize", ()=>renderEdges());
+})();
+</script>
+</body>
+</html>

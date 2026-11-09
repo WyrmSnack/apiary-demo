@@ -1,0 +1,182 @@
+{
+  "about": "Acceptance lines (spec section 9). 'argv' is the exact argument vector, program first.",
+  "valid": [
+    {
+      "line": "pytest tests/test_x.py",
+      "argv": [
+        "pytest",
+        "tests/test_x.py"
+      ]
+    },
+    {
+      "line": "python -c \"exit(1)\"",
+      "argv": [
+        "python",
+        "-c",
+        "exit(1)"
+      ]
+    },
+    {
+      "line": "python -c \"print('hi')\"",
+      "argv": [
+        "python",
+        "-c",
+        "print('hi')"
+      ]
+    },
+    {
+      "line": "a   b\tc",
+      "argv": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    {
+      "line": "  a b  ",
+      "argv": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "line": "tests\\test_x.py",
+      "argv": [
+        "tests\\test_x.py"
+      ]
+    },
+    {
+      "line": "\"a \\\"b\\\" c\"",
+      "argv": [
+        "a \"b\" c"
+      ]
+    },
+    {
+      "line": "a\"b c\"d",
+      "argv": [
+        "ab cd"
+      ]
+    },
+    {
+      "line": "x \"\"",
+      "argv": [
+        "x",
+        ""
+      ]
+    },
+    {
+      "line": "\"C:\\\\Program Files\\\\x\"",
+      "argv": [
+        "C:\\Program Files\\x"
+      ]
+    },
+    {
+      "line": "\"C:\\Program Files\"",
+      "argv": [
+        "C:\\Program Files"
+      ]
+    },
+    {
+      "line": "python -m pytest -q -k \"not slow\"",
+      "argv": [
+        "python",
+        "-m",
+        "pytest",
+        "-q",
+        "-k",
+        "not slow"
+      ]
+    },
+    {
+      "line": "x --flag=\"#not-a-comment; |&<>$%*?()`'\"",
+      "argv": [
+        "x",
+        "--flag=#not-a-comment; |&<>$%*?()`'"
+      ]
+    },
+    {
+      "line": "x \"trailing backslash\\\\\"",
+      "argv": [
+        "x",
+        "trailing backslash\\"
+      ]
+    },
+    {
+      "line": "x Grassé",
+      "argv": [
+        "x",
+        "Grassé"
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "line": "",
+      "why": "empty"
+    },
+    {
+      "line": "   ",
+      "why": "blank"
+    },
+    {
+      "line": "python -c 'exit(1)'",
+      "why": "single quotes: exits 0 under cmd.exe (ADR 0002)"
+    },
+    {
+      "line": "pytest tests/x.py   # comment",
+      "why": "hash: a comment in sh, an argument in cmd.exe"
+    },
+    {
+      "line": "a | b",
+      "why": "pipe"
+    },
+    {
+      "line": "a && b",
+      "why": "ampersand"
+    },
+    {
+      "line": "a; b",
+      "why": "semicolon"
+    },
+    {
+      "line": "a > out.txt",
+      "why": "redirect"
+    },
+    {
+      "line": "a < in.txt",
+      "why": "redirect"
+    },
+    {
+      "line": "echo $HOME",
+      "why": "sh variable"
+    },
+    {
+      "line": "echo %PATH%",
+      "why": "cmd variable"
+    },
+    {
+      "line": "ls *.py",
+      "why": "glob"
+    },
+    {
+      "line": "ls ?.py",
+      "why": "glob"
+    },
+    {
+      "line": "(a)",
+      "why": "subshell"
+    },
+    {
+      "line": "echo `id`",
+      "why": "command substitution"
+    },
+    {
+      "line": "x \"unterminated",
+      "why": "unterminated quote"
+    },
+    {
+      "line": "x \"ends in escaped quote\\\"",
+      "why": "unterminated quote"
+    }
+  ]
+}

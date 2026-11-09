@@ -1,0 +1,46 @@
+
+## 1. Make a colony
+  next: start Claude Code in this folder, approve the 'colony' MCP server when asked, and ask it to claim and close a task
+
+## 2. Create a task whose check fails today
+  CREATED 001-fix-add.task
+  expected CREATED: yes
+
+## 3. Claim it
+  CLAIMED 001-fix-add.task token=8e665b52253b278b lease_until=2026-11-09T07:05Z
+  expected CLAIMED: yes
+
+## 4. Close it before the work is done
+  REFUSED: acceptance exit 1; task stays active
+  expected REFUSED: yes
+
+## 5. Rewrite the task's own check so it passes, then close
+  REFUSED: 001-fix-add.task changed since it was claimed, so its acceptance line is not the one that was agreed. Nothing closed. Restore it, or escalate to the Queen.
+  expected REFUSED: yes
+
+## 6. Write the ledger and the task file directly, as Claude Code would
+  REFUSED Write: colony guard: PHEROMONE_LEDGER.md is a substrate or gate file. Use the colony tools (claim_task, renew_claim, 
+  expected REFUSED: yes
+  REFUSED Edit: colony guard: tasks/active/001-fix-add.task is a substrate or gate file. Use the colony tools (claim_task, ren
+  expected REFUSED: yes
+  REFUSED Bash: colony guard: blocked `echo DONE >> PHEROMONE_LEDGER.md` (PHEROMONE_LEDGER.md): redirects output into a substr
+  expected REFUSED: yes
+  ALLOWED Edit calc.py (the file the task writes)
+  expected ALLOWED: yes
+
+## 7. Do the work, then close
+  DONE 001-fix-add.task
+  expected DONE: yes
+
+## 8. Check the colony against the spec
+  valid
+  expected valid: yes
+
+## The ledger this run wrote
+  2026-11-09T06:05Z | Queen | DEPOSIT | tasks/pending/001-fix-add.task | task created with create_task
+  2026-11-09T06:05Z | Forager | CLAIM | tasks/active/001-fix-add.task | token=8e665b52253b278b lease_until=2026-11-09T07:05Z task_sha256=9ee8fef7e191ab24d972d3563cc182896f9249b90e460d992f3df6622a0669eb
+  2026-11-09T06:05Z | Forager | WARN | tasks/active/001-fix-add.task | close refused: acceptance exit 1
+  2026-11-09T06:05Z | Forager | WARN | tasks/active/001-fix-add.task | close refused: task file changed since claim
+  2026-11-09T06:05Z | Forager | DONE | tasks/done/001-fix-add.task | acceptance passed token=8e665b52253b278b
+
+all steps gave the expected result

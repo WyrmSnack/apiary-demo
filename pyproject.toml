@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=77"]   # SPDX license expressions (PEP 639)
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apiary"
+version = "0.9.0"
+description = "Reference implementation of the Colony Substrate Specification for coordinating coding agents through files"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE", "LICENSING.md"]
+dependencies = ["mcp>=2.3,<3", "filelock>=3.12"]
+
+[project.scripts]
+apiary = "apiary.cli:main"
+
+[tool.setuptools]
+packages = ["apiary", "apiary.gates"]
+
+[tool.setuptools.package-data]
+apiary = ["templates/*.md", "templates/*.html", "templates/knowledge/*.md", "templates/agents/*.md", "templates/skills/*.md",
+          "templates/godot/*.gd"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

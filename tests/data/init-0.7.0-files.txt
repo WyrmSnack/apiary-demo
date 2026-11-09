@@ -1,0 +1,25 @@
+.claude/agents/forager.md
+.claude/agents/guardian.md
+.claude/agents/nurse.md
+.claude/skills/colony-connectors/SKILL.md
+.claude/skills/colony-plan/SKILL.md
+.claude/skills/colony-task/SKILL.md
+.gitattributes
+.gitignore
+CLAUDE.md
+PHEROMONE_LEDGER.md
+TRACES.md
+castes/forager.md
+castes/nurse.md
+castes/queen.md
+knowledge/Concepts/.gitkeep
+knowledge/Playbooks/.gitkeep
+knowledge/Tools/.gitkeep
+knowledge/Workflows/.gitkeep
+knowledge/_templates/Concept Card Template.md
+knowledge/_templates/Playbook Card Template.md
+knowledge/_templates/Tool Card Template.md
+knowledge/_templates/Workflow Card Template.md
+tasks/active/.gitkeep
+tasks/done/.gitkeep
+tasks/pending/.gitkeep

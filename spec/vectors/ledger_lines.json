@@ -1,0 +1,123 @@
+{
+  "about": "Ledger lines (spec section 4), each given without its LF.",
+  "valid": [
+    "2026-10-14T12:00Z | Forager | CLAIM | tasks/active/014-save-slots.task | token=0123456789abcdef lease_until=2026-10-14T13:00Z",
+    "2026-10-14T12:00Z | Guardian | WARN | engine/physics.py | 4 open WARNs; see ledger",
+    "2026-10-14T12:00Z | SignalSprite | DEPOSIT | reports/run-1.md | Grassé would approve",
+    "2026-10-14T12:00Z | Scribe | ESCALATE | parts/ch07.md | no card supports the 68% figure",
+    "2026-10-14T12:00Z | Forager | DEPOSIT | engine/save.py | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "2026-10-14T12:00Z | Forager | DEPOSIT | pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp | added save slots",
+    "2024-02-29T23:59Z | Forager | DEPOSIT | engine/save.py | added save slots"
+  ],
+  "invalid": [
+    {
+      "line": "2026-10-14T12:00 | Forager | DEPOSIT | engine/save.py | added save slots",
+      "rule": "L-1",
+      "why": "timestamp without Z"
+    },
+    {
+      "line": "2026-10-14T12:00:00Z | Forager | DEPOSIT | engine/save.py | added save slots",
+      "rule": "L-1",
+      "why": "seconds"
+    },
+    {
+      "line": "2026-13-01T00:00Z | Forager | DEPOSIT | engine/save.py | added save slots",
+      "rule": "L-2",
+      "why": "month 13"
+    },
+    {
+      "line": "2025-02-29T00:00Z | Forager | DEPOSIT | engine/save.py | added save slots",
+      "rule": "L-2",
+      "why": "not a leap year"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Signal Sprite | DEPOSIT | engine/save.py | added save slots",
+      "rule": "L-1",
+      "why": "kit spelling of the caste"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Overlord | DEPOSIT | engine/save.py | added save slots",
+      "rule": "L-1",
+      "why": "unknown caste"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | ISSUE | engine/save.py | added save slots",
+      "rule": "L-1",
+      "why": "unknown signal"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine/save.py | xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "rule": "L-1",
+      "why": "note longer than 160"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp | added save slots",
+      "rule": "L-1",
+      "why": "path longer than 200"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine/my file.py | added save slots",
+      "rule": "L-1",
+      "why": "space in path"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | /etc/passwd | added save slots",
+      "rule": "L-3",
+      "why": "absolute path"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | C:/colony/x.py | added save slots",
+      "rule": "L-3",
+      "why": "drive letter"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine\\save.py | added save slots",
+      "rule": "L-3",
+      "why": "backslash"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | tasks/../secrets | added save slots",
+      "rule": "L-3",
+      "why": "dot-dot segment"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine/save.py |  leading space",
+      "rule": "L-4",
+      "why": "note starts with a space"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine/save.py | trailing space ",
+      "rule": "L-4",
+      "why": "note ends with a space"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine/save.py | tab\there",
+      "rule": "L-1",
+      "why": "control character in note"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine/save.py | ",
+      "rule": "L-1",
+      "why": "empty note"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine/save.py",
+      "rule": "L-1",
+      "why": "four fields"
+    },
+    {
+      "line": "2026-10-14T12:00Z | Forager | DEPOSIT | engine/save.py | a | b",
+      "rule": "L-1",
+      "why": "extra field"
+    },
+    {
+      "line": "2026-10-14T12:00Z|Forager|DEPOSIT|engine/save.py|note",
+      "rule": "L-1",
+      "why": "separators without spaces"
+    }
+  ],
+  "comments": [
+    "",
+    "# PHEROMONE_LEDGER for the save-slots colony"
+  ]
+}

@@ -1,0 +1,4 @@
+# Substrate files and scripts are LF everywhere so the ledger grammar and
+# shebangs survive a Windows checkout with core.autocrlf=true.
+* text=auto eol=lf
+*.zip binary

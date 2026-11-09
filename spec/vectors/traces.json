@@ -1,0 +1,50 @@
+{
+  "about": "TRACES.md (section 6).",
+  "valid_keys": [
+    "save-format",
+    "save-format-v2",
+    "a1",
+    "0-start",
+    "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+  ],
+  "invalid_keys": [
+    "a",
+    "Save-format",
+    "save_format",
+    "-save",
+    "save format",
+    "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    ""
+  ],
+  "valid_documents": [
+    "# TRACES\n",
+    "# TRACES\n\n## KEY: save-format\n- by: Queen at 2026-10-14T12:00Z\n- VALUE: JSON, versioned.\n\n## KEY: save-format-v2\n- by: Guardian at 2026-10-14T13:00Z\n- SUPERSEDES: save-format\n- VALUE: JSON, versioned, atomic writes.\n"
+  ],
+  "invalid_documents": [
+    {
+      "text": "\n## KEY: a1\n- by: Queen at 2026-10-14T12:00Z\n- VALUE: x\n\n## KEY: a1\n- by: Queen at 2026-10-14T12:01Z\n- VALUE: y\n",
+      "rule": "R-3",
+      "why": "duplicate key"
+    },
+    {
+      "text": "\n## KEY: a2\n- by: Queen at 2026-10-14T12:00Z\n- SUPERSEDES: nope\n- VALUE: x\n",
+      "rule": "R-4",
+      "why": "supersedes an unknown key"
+    },
+    {
+      "text": "\n## KEY: a1\n- by: Queen at 2026-10-14T12:00Z\n",
+      "rule": "R-1",
+      "why": "no VALUE"
+    },
+    {
+      "text": "\n## KEY: a1\n- by: Overlord at 2026-10-14T12:00Z\n- VALUE: x\n",
+      "rule": "R-1",
+      "why": "unknown caste"
+    },
+    {
+      "text": "\n## KEY: a1\n- by: Queen at 2026-10-14T12:00Z\n- VALUE: x\n- EXTRA: y\n",
+      "rule": "R-1",
+      "why": "unknown entry line"
+    }
+  ]
+}
