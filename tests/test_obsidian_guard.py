@@ -177,7 +177,9 @@ def test_the_vault_root_and_folders_that_hold_guarded_files_are_not_writable(vau
     assert not decide(obs(vault, "move_file", oldPath=rel, newPath="attic/x"), vault)[0], rel
 
 
-@pytest.mark.parametrize("rel", ["../outside.md", "notes/../../outside.md", "/etc/passwd", "C:/Windows/x.md"])
+@pytest.mark.parametrize("rel", ["../outside.md", "notes/../../outside.md", "/etc/passwd",
+                                 pytest.param("C:/Windows/x.md", marks=pytest.mark.skipif(
+                                     os.name != "nt", reason="on Linux and macOS this is a folder inside the vault"))])
 def test_an_escape_is_refused_even_when_the_whole_vault_is_listed(vault, rel):
     """Found by the mutation run: with write_folders ["."] only the escape check stops a path outside the vault."""
     scope(vault, write_folders=["."])

@@ -61,6 +61,14 @@ SUBSTITUTIONS = [
      '        "C--Users-james-Desktop-ForgeProjects-my-colony"',
      'project_dir(r"C:\\Users\\dev\\Desktop\\Projects\\my-colony").name == \\\n'
      '        "C--Users-dev-Desktop-Projects-my-colony"', "a fixture held the author's home folder"),
+    ("tests/test_obsidian_guard.py",
+     '"/etc/passwd", "C:/Windows/x.md"])\ndef test_an_escape_is_refused',
+     '"/etc/passwd",\n'
+     '                                 pytest.param("C:/Windows/x.md", marks=pytest.mark.skipif(\n'
+     '                                     os.name != "nt", reason="on Linux and macOS this is a folder inside the vault"))])\n'
+     'def test_an_escape_is_refused',
+     "a Windows drive path is only an escape on Windows; elsewhere it names a folder inside the vault, so the "
+     "guard rightly allows it (found by this repository's first Linux CI run)"),
     ("tests/test_migrate.py", "read-only survey of eight under Desktop/ForgeProjects",
      "read-only survey of eight on the author's machine", "a docstring named the author's folders"),
     ("conformance/README.md", "checks an implementation of `spec/SUBSTRATE_SPEC.md` from the outside",

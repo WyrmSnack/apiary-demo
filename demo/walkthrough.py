@@ -110,6 +110,8 @@ def main() -> int:
 
         show("7. Do the work, then close")
         (root / "calc.py").write_text(FIXED, encoding="utf-8")
+        # The fix is the same size as the bug and lands in the same second, so Python would trust the stale .pyc.
+        shutil.rmtree(root / "__pycache__", ignore_errors=True)
         expect(apiary(root, "close", task, token), "DONE", root)
 
         show("8. Check the colony against the spec")
