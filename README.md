@@ -7,8 +7,10 @@ two agents take the same task, a session dies holding work nobody can reclaim, a
 without running the check, or it quietly rewrites the check so it passes. Apiary solves each of these with a small,
 testable mechanism. Each one is a named requirement in a written spec, with tests that check it from the outside.
 
-> **Are you an AI agent?** Start with [`AGENTS.md`](AGENTS.md): what to read, the commands that verify this repository,
-> and how to set apiary up in your human's project. [`llms.txt`](llms.txt) is the same map in one file.
+> **Are you an AI agent?** Start with [`AGENTS.md`](AGENTS.md)
+> ([raw](https://raw.githubusercontent.com/WyrmSnack/apiary-demo/main/AGENTS.md)): what to read, the commands that
+> verify this repository with the output to expect, and how to set apiary up in your human's project.
+> [`llms.txt`](llms.txt) is a map of the whole repository.
 
 ## How it works, in one picture
 
@@ -45,13 +47,14 @@ The agents reach all of this through an MCP server (`claim_task`, `renew_claim`,
 lives in the code, and the test that proves it. It's the most useful page here if you're building your own
 multi-agent system, whether or not you use apiary.
 
-## See it in two minutes
+## See it work
 
 ```bash
 git clone https://github.com/WyrmSnack/apiary-demo
 cd apiary-demo
+python -m venv .venv && source .venv/bin/activate   # Windows (Git Bash): source .venv/Scripts/activate
 python -m pip install -e .
-python demo/walkthrough.py
+python demo/walkthrough.py                         # under a minute once installed
 ```
 
 The walkthrough makes a colony in a temporary folder and plays the agent's part with the same tools an agent gets:
@@ -124,15 +127,15 @@ The language-neutral test vectors for the file grammars are in [`spec/vectors/`]
 ## Run the checks
 
 ```bash
-python -m pip install -r requirements-dev.txt
-python -m pip install -e .
-python -m pytest -q tests                          # 673 unit tests
-python conformance/run.py reference                # must conform
-python conformance/run.py naive --expect-fail      # must not
+python -m pip install -r requirements-dev.txt -e .   # in a virtual environment
+python -m pytest -q tests                          # 673 unit tests, about 2 minutes
+python conformance/run.py reference                # must conform; several minutes (each test starts a server)
+python conformance/run.py naive --expect-fail      # must not: prints ~150 expected FAILED lines, exits 0
 python ci/clean_install_check.py                   # installs as a user would, then drives it as Claude Code does
 ```
 
-CI runs all of these on Linux (Python 3.11 to 3.13) and Windows on every push.
+[`AGENTS.md`](AGENTS.md#verify-the-claims) lists the exact output to expect from each. CI runs all of them on Linux
+(Python 3.11 to 3.14) and Windows on every push.
 
 ## Design limits
 
@@ -140,6 +143,11 @@ CI runs all of these on Linux (Python 3.11 to 3.13) and Windows on every push.
   out to cheat. The guard stops ordinary edits and shell redirects, but a script an agent writes and then runs gets
   past it. The real check comes afterwards: compare the ledger's history with git. See
   [write-up 03](writeups/03-the-guard-had-a-hole.md).
+- **It coordinates tasks, not files.** Agents share one working tree. Apiary keeps two agents off the same task, and
+  `create_plan` refuses parallel tasks whose `writes:` overlap, but nothing stops an edit outside a task's `writes:`
+  line. One agent's half-finished edit can break another's check. Use separate worktrees if that matters.
+- **Only the task file is pinned.** An agent can still weaken the tests its check runs. Keep checks in `gates/` and
+  run the same tests in CI. See [CONCEPTS §4](docs/CONCEPTS.md#4-the-task-is-pinned-at-claim).
 - **It doesn't make agents cheaper.** Coordination costs tokens. See [write-up 01](writeups/01-it-lost-on-cost.md) for
   how much, and what it buys.
 - **The hooks are for Claude Code.** The protocol and MCP tools work with any MCP client. Only the guard hook uses

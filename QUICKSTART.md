@@ -24,6 +24,9 @@ The steps below are the same thing done by hand, in a fresh folder.
 python -m pip install "git+https://github.com/WyrmSnack/apiary-demo"
 ```
 
+A virtual environment works. Install apiary into the environment that has your project's test tools: a task's check
+runs `python` as the interpreter apiary is installed in.
+
 ## 2. Make a colony
 
 ```bash

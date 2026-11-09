@@ -1,7 +1,8 @@
 # The guard had a hole, and how I know the fix holds
 
 *Kevin Wilkins, November 2026. The "before" numbers come from the run log of apiary 0.8.0 (private commit `2a07698`,
-2026-10-19). The "after" numbers come from this repository, and you can rerun them.*
+2026-10-19). Of the "after" numbers, the 101 tests rerun from this repository (the commands are at the end). The
+planted-bug run used a script in the full repository, which isn't included here.*
 
 **In short:** a guard that lists the tools it checks lets through every tool it doesn't list. I found this by reading
 the code before connecting a new MCP server (a notes vault) to the colony. The fix was written test-first, and the
@@ -52,8 +53,10 @@ folder that holds guarded templates. Each got a new test, and the rerun caught a
 
 The guard is a speed bump, not a sandbox, and the spec says so (section 12):
 
-- A shell command is checked by pattern. A script the agent writes and then runs is invisible to the hook. The
-  defence after the fact is `apiary validate --since <commit>`, which checks that nothing append-only changed.
+- A shell command is checked by pattern. A script the agent writes and then runs is invisible to the hook, and so is
+  a file name built from a variable (`F=PHEROMONE_LEDGER; echo x >> $F.md`). The defence after the fact is
+  `apiary validate --since <commit>`, which checks that nothing append-only changed. `apiary init` installs it as a
+  pre-commit hook.
 - It protects only where it runs: in Claude Code, with the hook installed by `apiary init`.
 - An agent with commit rights that sets out to cheat can be caught only afterwards, by a human or by a check it
   cannot edit, such as CI on a protected branch.

@@ -1,7 +1,7 @@
 # How apiary keeps coding agents honest
 
 Nine mechanisms, each written up the same way: **the failure** it prevents, **the mechanism**, **where it is** in the
-code, and **the proof** (the tests, named after the spec requirements they check). None of them needs a database, a
+code, **the proof** (the tests, named after the spec requirements they check), and, where there is one, **the limit**. None of them needs a database, a
 daemon or a network service. They're files, one lock, and checks that run before anything is written.
 
 You can borrow any of these for your own multi-agent system. Each one stands on its own.
@@ -16,7 +16,7 @@ You can borrow any of these for your own multi-agent system. Each one stands on 
 | 6 | [Append-only ledger with reserved signals](#6-append-only-ledger-with-reserved-signals) | Forged history |
 | 7 | [Whole plans or nothing](#7-whole-plans-or-nothing) | Parallel tasks that overwrite each other |
 | 8 | [A guard hook in front of the agent](#8-a-guard-hook-in-front-of-the-agent) | Agents editing the shared files directly |
-| 9 | [The human's yes, read from the transcript](#9-the-humans-yes-read-from-the-transcript) | Agents approving their own plans |
+| 9 | [Wait for the human, enforced from the transcript](#9-wait-for-the-human-enforced-from-the-transcript) | Agents creating work before the human has seen it |
 
 ---
 
@@ -90,6 +90,10 @@ direct edits to an active task.
 
 **Proof.** `test_P18_claim_pins_the_task_file_by_hash`, `test_P18_editing_the_task_after_claiming_cannot_pass_the_gate`.
 Step 5 of [`demo/walkthrough.py`](../demo/walkthrough.py) shows it.
+
+**Limit.** Only the task file is pinned, not the tests or script its check runs. An agent that weakens
+`tests/test_calc.py` until it passes isn't stopped here. Two defences: put the check in `gates/` (`apiary task new
+--gate`), a folder the guard covers, and run the same tests in CI where agents can't edit them.
 
 ## 5. Acceptance is an argv, not a shell string
 
@@ -165,10 +169,13 @@ the human listed.
 [`tests/test_obsidian_guard.py`](../tests/test_obsidian_guard.py). [Write-up 03](../writeups/03-the-guard-had-a-hole.md)
 is the story of a hole in it and how the fix was proven.
 
-**Limit.** It's a speed bump, not a sandbox. A script the agent writes and then runs isn't inspected. The defence
-afterwards is comparing the ledger's history with git.
+**Limit.** It's a speed bump, not a sandbox. Shell commands are checked by pattern, so a script the agent writes and
+then runs isn't inspected, and neither is a file name built from a variable (`F=PHEROMONE_LEDGER; echo x >> $F.md`).
+It also guards only the colony's own files: a task's `writes:` line says which project files the task may change, but
+nothing stops an edit outside it. The defence afterwards is the pre-commit hook `apiary init` installs, which runs
+`apiary validate --since HEAD` and refuses a commit that changed any append-only line.
 
-## 9. The human's yes, read from the transcript
+## 9. Wait for the human, enforced from the transcript
 
 **Failure.** Told to "show the plan and wait for approval", an agent shows the plan and creates the tasks in the same
 turn. Measured: **2 of 3** solo runs did this.
@@ -184,12 +191,16 @@ A hook makes waiting the only thing that works.
 `test_K2_closing_a_checkpoint_records_that_the_human_approved`. After the hook (apiary 0.6.1), **6 of 6** colony runs
 asked first ([`measurements/`](../measurements/README.md)).
 
+**Limit.** The hook checks *that* the human replied, not *what* they said. A "no" unlocks it just as a "yes" does,
+and one reply unlocks the rest of the session. What it guarantees is that the human saw the plan before any task
+existed. Reading consent from free text is a judgement, and that stays with the agent and the human.
+
 ---
 
 ## The pattern underneath
 
 Each mechanism moves a rule out of the prompt and into something that runs. A prompt says "don't edit the check".
 The hash pin makes editing the check useless. A prompt says "only one agent per task". The rename makes it so. A
-prompt says "wait for approval". The hook refuses until the approval is there.
+prompt says "wait for approval". The hook refuses until the human has answered.
 
 Agents follow rules they can't break more reliably than rules they're asked to keep.
