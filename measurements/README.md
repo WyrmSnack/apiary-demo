@@ -1,7 +1,8 @@
 # Measurements
 
-**Nobody outside this project uses apiary.** These are my own benchmark runs of my own design: 24 counted runs on two
-exactly specified projects, on one Windows machine with one model, each graded by hidden tests the agents never saw.
+The benchmark behind the write-ups: 24 counted runs on two exactly specified projects, on one Windows machine with one
+model, each graded by hidden tests the agents never saw. You can grade your own agent setup on the same two projects
+with the specs and hidden tests in [`bench/`](../bench/).
 The story they tell is in [write-up 01](../writeups/01-it-lost-on-cost.md).
 
 | File | What |

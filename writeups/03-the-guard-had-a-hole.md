@@ -3,8 +3,9 @@
 *Kevin Wilkins, November 2026. The "before" numbers come from the run log of apiary 0.8.0 (private commit `2a07698`,
 2026-10-19). The "after" numbers come from this repository, and you can rerun them.*
 
-**Nobody outside this project uses apiary.** The hole below was found by reading my own code before connecting a new
-tool to my own notes vault. No one else was exposed to it.
+**In short:** a guard that lists the tools it checks lets through every tool it doesn't list. I found this by reading
+the code before connecting a new MCP server (a notes vault) to the colony. The fix was written test-first, and the
+tests were then checked by planting bugs in the fix to see whether they caught them.
 
 ## The guard, in one paragraph
 

@@ -4,7 +4,7 @@ Written by `tools/export.py`. This repository is built from the private `apiary-
 a fork you can pull from, and it is regenerated rather than edited by hand.
 
 - **Source commit:** `e704dc91b9b0a0284d327fe3282d0782eb610af7` (apiary 0.9.0)
-- **Files copied unchanged from that commit:** 125; changed by the substitutions below: 6; written for this repository: 13
+- **Files copied unchanged from that commit:** 125; changed by the substitutions below: 6; written for this repository: 17
 - **File-list digest:** `3d745dc9116d3302`
 - **Scrub scan:** passed, 0 findings (home folders, the author's private folder names, e-mail addresses, GitHub, Anthropic and AWS tokens, private keys)
 

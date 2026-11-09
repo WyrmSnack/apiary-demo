@@ -5,8 +5,10 @@ which a script generated from the run records. The plans, hypotheses and decisio
 run of each phase: [`PHASE6.md`](../measurements/method/PHASE6.md), [`PHASE7.md`](../measurements/method/PHASE7.md),
 [`PHASE8.md`](../measurements/method/PHASE8.md).*
 
-**Nobody outside this project uses apiary.** It is my own work. The runs below are me measuring my own design on my
-own machine. They are not a user study, and they say nothing about adoption.
+**In short:** a colony of agents coordinating through shared files cost 7.7 times what one plain session cost, for the
+same score. Cutting the colony's overhead brought it down to about one session's cost, but never below it. If you're
+building a multi-agent system, measure it against one agent working alone, and decide before the first run what result
+would count as a win.
 
 ## The claim I set out to test
 

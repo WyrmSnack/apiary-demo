@@ -3,8 +3,10 @@
 *Kevin Wilkins, November 2026. Every number here comes from running the conformance suite in this repository; the
 command to rerun it is at the end.*
 
-**Nobody outside this project uses apiary or its spec.** This is a measurement of my own code against my own
-specification, which I wrote before building the reference implementation and changed only by recorded amendments.
+**In short:** the agent-colony design I started from sounds complete in prose. Built exactly as written and tested
+against a spec, it meets 8 of 49 requirements. The gaps are the ordinary ones in concurrent systems: no tokens, no
+leases, no lock, and a check that passes on Windows when it should fail. The spec was written before the reference
+implementation, and has changed since only by recorded amendments.
 
 ## What is being compared
 

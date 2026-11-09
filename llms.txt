@@ -1,0 +1,37 @@
+# apiary
+
+> Coordination for coding agents that share a repository, built from plain files: an append-only ledger, a decision log, and task folders whose folder is the status. Agents change them only through an MCP server that issues fencing tokens and leases, pins each task file by SHA-256 at claim, and closes a task only when its own acceptance command exits 0. A Claude Code PreToolUse hook refuses direct edits. Specified (49 requirements), with a black-box conformance suite. Python 3.11+, AGPL-3.0 (spec CC BY-SA 4.0).
+
+Install: `python -m pip install "git+https://github.com/WyrmSnack/apiary-demo"`, then `python -m apiary init --example` in a git repository. Verify this repository: `python demo/walkthrough.py`, `python -m pytest -q tests`, `python conformance/run.py reference`.
+
+## Start here
+
+- [AGENTS.md](https://github.com/WyrmSnack/apiary-demo/blob/main/AGENTS.md): for AI agents. Evaluate, set up in a project, work in a colony, status words
+- [README](https://github.com/WyrmSnack/apiary-demo/blob/main/README.md): overview, the lifecycle diagram, what was measured
+- [Concepts](https://github.com/WyrmSnack/apiary-demo/blob/main/docs/CONCEPTS.md): nine mechanisms (atomic claim, fencing tokens, acceptance-gated close, hash-pinned tasks, argv acceptance, append-only ledger, all-or-nothing plans, guard hook, human approval from the transcript), each with code and tests
+- [Quickstart](https://github.com/WyrmSnack/apiary-demo/blob/main/QUICKSTART.md): a task claimed and closed by Claude Code in about five minutes
+
+## Specification
+
+- [Spec summary](https://github.com/WyrmSnack/apiary-demo/blob/main/spec/SUMMARY.md): Colony Substrate Specification 0.9.0, requirements by ID
+- [Conformance suite](https://github.com/WyrmSnack/apiary-demo/blob/main/conformance/README.md): tests any implementation over MCP stdio and the files on disk
+- [Test vectors](https://github.com/WyrmSnack/apiary-demo/tree/main/spec/vectors): language-neutral grammar cases
+
+## Write-ups (measured before and after)
+
+- [It lost on cost](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/01-it-lost-on-cost.md): a textbook agent colony used 7.7x a single session's tokens; the redesign cut 87%, to about parity
+- [The textbook design fails its own spec](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/02-the-textbook-design-fails-its-own-spec.md): 8 of 49 requirements against 49 of 49
+- [The guard had a hole](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/03-the-guard-had-a-hole.md): another MCP server could write the ledger; the fix and its proof (101 tests, 30 of 30 planted bugs caught)
+
+## Code
+
+- [apiary/colony.py](https://github.com/WyrmSnack/apiary-demo/blob/main/apiary/colony.py): claim, renew, close, resume, create_plan
+- [apiary/hook.py](https://github.com/WyrmSnack/apiary-demo/blob/main/apiary/hook.py): the guard (`decide`)
+- [apiary/grammar.py](https://github.com/WyrmSnack/apiary-demo/blob/main/apiary/grammar.py): ledger, task, trace and acceptance grammars
+- [apiary/server.py](https://github.com/WyrmSnack/apiary-demo/blob/main/apiary/server.py): the MCP tools
+
+## Optional
+
+- [Measurements](https://github.com/WyrmSnack/apiary-demo/blob/main/measurements/README.md): every benchmark run and the pre-registered plans
+- [Walkthrough output](https://github.com/WyrmSnack/apiary-demo/blob/main/demo/walkthrough.txt): one recorded run
+- [EXPORT.md](https://github.com/WyrmSnack/apiary-demo/blob/main/EXPORT.md): how this repository is built and what it leaves out

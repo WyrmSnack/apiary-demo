@@ -9,6 +9,15 @@ From nothing to a task claimed and closed by Claude Code, in about five minutes.
 - **Git**, with your name and email set.
 - **Claude Code** (the CLI, or the Code tab of the Claude desktop app).
 
+## Or let your agent do it
+
+In Claude Code, in the repository you want to use, send:
+
+> *Set up apiary in this repository by following the "Set apiary up" section of
+> https://github.com/WyrmSnack/apiary-demo/blob/main/AGENTS.md. Show me what it will add before you run init.*
+
+The steps below are the same thing done by hand, in a fresh folder.
+
 ## 1. Install
 
 ```bash
