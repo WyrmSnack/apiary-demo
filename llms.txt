@@ -6,7 +6,7 @@ Install: `python -m pip install "git+https://github.com/WyrmSnack/apiary-demo"`,
 
 ## Start here
 
-- [AGENTS.md](https://github.com/WyrmSnack/apiary-demo/blob/main/AGENTS.md): for AI agents. Evaluate, set up in a project, work in a colony, status words
+- [AGENTS.md](https://github.com/WyrmSnack/apiary-demo/blob/main/AGENTS.md): for AI agents: evaluation, installation in a project, working in a colony, status words
 - [README](https://github.com/WyrmSnack/apiary-demo/blob/main/README.md): overview, the lifecycle diagram, what was measured
 - [Concepts](https://github.com/WyrmSnack/apiary-demo/blob/main/docs/CONCEPTS.md): nine mechanisms (atomic claim, fencing tokens, acceptance-gated close, hash-pinned tasks, argv acceptance, append-only ledger, all-or-nothing plans, guard hook, human approval from the transcript), each with code and tests
 - [Quickstart](https://github.com/WyrmSnack/apiary-demo/blob/main/QUICKSTART.md): a task claimed and closed by Claude Code in about five minutes
@@ -17,11 +17,11 @@ Install: `python -m pip install "git+https://github.com/WyrmSnack/apiary-demo"`,
 - [Conformance suite](https://github.com/WyrmSnack/apiary-demo/blob/main/conformance/README.md): tests any implementation over MCP stdio and the files on disk
 - [Test vectors](https://github.com/WyrmSnack/apiary-demo/tree/main/spec/vectors): language-neutral grammar cases
 
-## Write-ups (measured before and after)
+## Write-ups (measured baseline and result)
 
-- [It lost on cost](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/01-it-lost-on-cost.md): a textbook agent colony used 7.7x a single session's tokens; the redesign cut 87%, to about parity
-- [The textbook design fails its own spec](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/02-the-textbook-design-fails-its-own-spec.md): 8 of 49 requirements against 49 of 49
-- [The guard had a hole](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/03-the-guard-had-a-hole.md): another MCP server could write the ledger; the fix and its proof (101 tests, 30 of 30 planted bugs caught)
+- [01. The token cost of a coordinated agent colony](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/01-coordination-cost.md): a textbook agent colony used 7.7x the tokens of a single session; the redesign reduced this by 87%, to approximate parity
+- [02. Conformance of the original design to the specification](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/02-specification-conformance.md): 8 of 49 requirements against 49 of 49
+- [03. An MCP bypass of the guard hook](https://github.com/WyrmSnack/apiary-demo/blob/main/writeups/03-guard-bypass.md): another MCP server could write the ledger; the fix and its verification (101 tests, 30 of 30 planted bugs detected)
 
 ## Code
 

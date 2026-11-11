@@ -84,6 +84,6 @@ fail, exits 0.
 ## What it does not protect against
 
 Tokens are not credentials: they are in the ledger, which every agent reads. They protect against mistakes and stale
-sessions, not against an agent that sets out to cheat and can write the repository. Such an agent can edit files
-directly; a guard hook is a speed bump, and the defence after the fact is checking the ledger's history against the last
-commit. The full text lists each attack and what notices it.
+sessions, not against an agent that deliberately circumvents the rules and can write to the repository. Such an agent can edit files
+directly; a guard hook prevents ordinary mistakes but is not a barrier, and the defence after the fact is checking the ledger's history against the last
+commit. The full text lists each attack and the control that detects it.
